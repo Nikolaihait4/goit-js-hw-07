@@ -2,23 +2,16 @@ import { galleryItems } from "./gallery-items.js";
 // Change code below this line
 // import * as basicLightbox from "basiclightbox";
 
-console.log(galleryItems);
+// console.log(galleryItems);
 
 const galleryItemUl = document.querySelector(".gallery");
-// console.log(galleryItemUl);
 
-const markupCreateGalleryItem = createGalleryItem(galleryItems.original);
-// console.log(markupCreateGalleryItem);
+// Мэпаем массив записываем в переменную добавляем разметку
 
-galleryItemUl.innerHTML = markupCreateGalleryItem;
-
-galleryItemUl.addEventListener("click", onClick);
-
-function createGalleryItem(item) {
-  return galleryItems
-    .map(
-      ({ preview, original, description }) =>
-        `<li class="gallery__item">
+const galleryEl = galleryItems
+  .map(
+    ({ preview, original, description }) =>
+      `<li class="gallery__item">
       <a class="gallery__link" href="large-image.jpg">
         <img
           class="gallery__image"
@@ -28,23 +21,39 @@ function createGalleryItem(item) {
         />
       </a>
     </li>`
-    )
-    .join("");
-  console.log(item);
-}
+  )
+  .join("");
+
+galleryItemUl.insertAdjacentHTML("beforeend", galleryEl);
+
+// Добавляем слушателя событий
+
+galleryItemUl.addEventListener("click", onClick);
 
 function onClick(evt) {
-  evt.preventDefault();
+  evt.preventDefault(); //запрет на переход по ссылке
 
   if (!evt.target.classList.contains("gallery__image")) {
-    return;
+    return; // Проверяем на попадание по картинке по классу
   }
-  //   console.log(evt.target.dataset.source);
-  basicLightbox
-    .create(
-      `
-		<img width="1920" height="1080" src="${evt.target.dataset.source}">
-	`
-    )
-    .show();
+  // Создаем модальнрое окно с помощью библиотеки
+
+  const modal = basicLightbox.create(
+    `
+		<img width="1920" height="1080" src="${evt.target.dataset.source}" alt="Image description">
+	`,
+
+    {
+      onShow: () => window.addEventListener("keydown", onEscKeyPress), //добаляем и удаляем слушателя событий
+      onClose: () => window.removeEventListener("keydown", onEscKeyPress),
+    }
+  );
+
+  modal.show();
+
+  function onEscKeyPress(evt) {
+    if (evt.code === "Escape") {
+      modal.close(); //проверка на Эскейп
+    }
+  }
 }
